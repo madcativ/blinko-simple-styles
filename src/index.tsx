@@ -8,6 +8,11 @@ import { Setting } from './setting';
 import plugin from '../plugin.json';
 import en from './locales/en.json';
 import zh from './locales/zh.json';
+import { PLUGIN_NAME } from './constants/plugin.consts';
+import { updateCSSVariables } from './actions/updateCSSVariables';
+import { getCSSVariables } from './actions/getCSSVariables';
+import { updateStyles } from './actions/updateStyles';
+import { getStyles } from './actions/getStyles';
 
 /**
  * Main plugin entry point registered with SystemJS
@@ -22,17 +27,17 @@ System.register([], (exports) => ({
       }
 
       // Flag indicating this plugin has a settings panel
-      // withSettingPanel = true;
+      withSettingPanel = true;
 
       // /**
       //  * Renders the settings panel UI
       //  * @returns {HTMLElement} Container element with rendered settings component
       //  */
-      // renderSettingPanel = () => {
-      //   const container = document.createElement('div');
-      //   render(<Setting />, container);
-      //   return container;
-      // }
+      renderSettingPanel = () => {
+        const container = document.createElement('div');
+        render(<Setting />, container);
+        return container;
+      }
 
       /**
        * Initializes the plugin
@@ -41,6 +46,9 @@ System.register([], (exports) => ({
       async init() {
         // Initialize internationalization
         this.initI18n();
+
+        // updateCSSVariables(document.documentElement, await getCSSVariables());
+        updateStyles(await getStyles());
         
         // Add toolbar icon with click handler
         // window.Blinko.addToolBarIcon({
@@ -82,8 +90,6 @@ System.register([], (exports) => ({
         //     return container;
         //   }
         // })
-
-        this.applyCustomTheme();
       }
 
       applyCustomTheme(){

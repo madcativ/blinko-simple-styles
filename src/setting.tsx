@@ -1,75 +1,78 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import type { JSXInternal } from 'preact/src/jsx';
+import { getCSSVariables } from './actions/getCSSVariables';
+import { saveSettings } from './actions/saveSettings';
+import { updateCSSVariables } from './actions/updateCSSVariables';
+import { ChangeEvent } from 'preact/compat';
+import { getStyles } from './actions/getStyles';
+import { updateStyles } from './actions/updateStyles';
 
-/**
- * Setting component for plugin configuration
- * Handles API token and notification settings
- */
 export function Setting(): JSXInternal.Element {
-  const [apiToken, setApiToken] = useState('');
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const i18n = window.Blinko.i18n;
+  const [colorsVars, setColorsVars] = useState<Record<string, string>>({});
+  const [styles, setStyles] = useState<string>("");
 
-  // Fetch initial plugin configuration on component mount
   useEffect(() => {
-    window.Blinko.api.config.getPluginConfig.query({
-      pluginName: 'my-note-plugin'
-    }).then((res: any) => {
-      setApiToken(res.apiToken)
-    })
+    getCSSVariables().then((vars) => {
+      setColorsVars(vars);
+    });
+
+    getStyles().then((styles) => {
+      setStyles(styles);
+    });
   }, []);
 
-  /**
-   * Handles saving of plugin settings
-   * Saves API token and closes settings panel
-   */
+  useEffect(() => {
+    updateCSSVariables(document.documentElement, colorsVars);
+    updateStyles(styles);
+  }, [colorsVars, styles]);
+
   const handleSave = async () => {
-    window.Blinko.toast.success(i18n.t('settingsSaved'));
-    window.Blinko.closeDialog();
-    await window.Blinko.api.config.setPluginConfig.mutate({
-      pluginName: 'my-note-plugin',
-      key: 'apiToken',
-      value: apiToken
-    });
-    window.Blinko.api.config.getPluginConfig.query({
-      pluginName: 'my-note-plugin'
-    });
+    await saveSettings({ colorsVars, styles });
   };
+
+  const handleColorVariablesChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    try {
+      const parsedValue = JSON.parse(e.currentTarget.value);
+      setColorsVars(parsedValue);
+    } catch { }
+  }
+
+  const handleStylesChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    try {
+      setStyles(e.currentTarget.value);
+    } catch { }
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-2 rounded-lg">
-      {/* API Token Input Section */}
-      <div className="mb-6">
+      <div className={"mb-6"}>
         <label className="block text-sm font-medium mb-2">
-          {i18n.t('apiTokenLabel')}
-          <input
-            value={apiToken}
-            onChange={(e) => setApiToken(e.currentTarget.value)}
-            placeholder={i18n.t('enterApiToken')}
-            className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm sm:text-sm bg-primary!"
+          Color Variables
+          <textarea
+            value={JSON.stringify(colorsVars, null, 2)}
+            onChange={handleColorVariablesChange}
+            placeholder='{"primary": "#ff0000", "secondary": "#00ff00"}'
+            className="mt-1 block w-full h-40 px-3 py-2 border rounded-md shadow-sm sm:text-sm bg-primary!"
           />
         </label>
       </div>
 
-      {/* Notification Settings Section */}
-      <div className="mb-6">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={notificationsEnabled}
-            onChange={(e) => setNotificationsEnabled(e.currentTarget.checked)}
-            className="h-4 w-4 text-primary-foreground bg-primary rounded"
+      <div className={"mb-6"}>
+        <label className="block text-sm font-medium mb-2">
+          Styles
+          <textarea
+            value={styles}
+            onChange={handleStylesChange}
+            className="mt-1 block w-full h-40 px-3 py-2 border rounded-md shadow-sm sm:text-sm bg-primary!"
           />
-          <span className="text-sm text-desc">{i18n.t('enableNotifications')}</span>
         </label>
       </div>
 
-      {/* Save Button */}
       <button
         onClick={handleSave}
-        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md bg-primary text-primary-foreground"
+        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md bg-primary text-primary-foreground cursor-pointer"
       >
-        {i18n.t('saveSettings')}
+        Save Settings
       </button>
     </div>
   );
