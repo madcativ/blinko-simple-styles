@@ -12,7 +12,7 @@
     "typescript": "^5.0.0",
     "vite": "^4.0.0"
   },
-  "description": "A plugin for changing node editor colors. e.g. list item decoration colors.",
+  "description": "Plugin for Blinko for changing web app's styles and CSS variables.",
   "scripts": {
     "dev": "blinko-cli dev server",
     "ngrok": "ngrok http 8080",
