@@ -1,4 +1,4 @@
-# Blinko Note Editor Colors
+# Blinko Simple Styles
 
 This repo contains a plugin for Blinko for changing web app's styles and CSS variables.
 
@@ -6,7 +6,7 @@ This repo contains a plugin for Blinko for changing web app's styles and CSS var
 
 1. Plugin -> Marketplace
 2. Click Install from GitHub
-3. Enter `https://github.com/madcativ/blinko-note-editor-colors`
+3. Enter `https://github.com/madcativ/blinko-simple-styles`
 4. Click Install
 
 ## Usage
